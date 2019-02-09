@@ -11,6 +11,7 @@ class MineHitException(Exception):
 
 class Game:
     def __init__(self):
+        sys.setrecursionlimit(10000)
         self.grid = Grid()
         self.score = 0
         self.round_number = 0
@@ -58,9 +59,9 @@ class Game:
 
 class Grid:
     def __init__(self):
-        self.width = 10
-        self.height = 10
-        self.mine_count = 10
+        self.width = 50
+        self.height = 50
+        self.mine_count = 100
         self.cell_count = self.width * self.height
         self.revealed_cell_count = 0
         self.revealable_cell_count = self.cell_count - self.mine_count
@@ -102,8 +103,6 @@ class Grid:
 
     def reveal_cell(self, x, y):
         cell = self.matrix[x][y]
-        if cell.revealed:
-            return
         cell.revealed = True
 
         if cell.mine:
@@ -119,7 +118,8 @@ class Grid:
                 if xi < 0 or yi < 0 or xi >= self.width or yi >= self.height:
                     continue
                 # Recurse!
-                self.reveal_cell(xi, yi)
+                if not self.matrix[xi][yi].revealed:
+                    self.reveal_cell(xi, yi)
 
     def calculate_number_of_mines_in_neighborhood(self, x, y):
         numberofneighbors = 0
