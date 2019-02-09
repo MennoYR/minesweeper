@@ -1,8 +1,3 @@
-
-# make limiter on number of mines in field (now number of mines can exceed field cells)
-# Add function flagged cleam main
-# check all variable names
-
 import collections
 import random
 import sys
