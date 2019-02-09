@@ -1,9 +1,7 @@
 
-# make a smart checker with if all fields that are == 0 and revealed have all their neighbors revealed. (nu bruutforce je de check en ga je uit van 5x goed genoeg is en dat is het zeker niet!)
 # make limiter on number of mines in field (now number of mines can exceed field cells)
 # Add function flagged cleam main
 # check all variable names
-# check of total revealed nog sense maakt
 
 import random
 import sys
@@ -11,8 +9,8 @@ import sys
 
 class Game:
     def __init__(self):
-        self.gridtotalrevealed = Grid()
-        self.gridplayed = self.gridtotalrevealed
+        #The cell value is (0 for nothing, 1-8 for #neighboring mines count)
+        self.gridplayed= Grid()
         self.game_end = False
         self.nextmove_x = 0
         self.nextmove_y = 0
@@ -21,10 +19,9 @@ class Game:
         self.round_number = 0
 
     def set_grid_total_revealed(self):
-        self.gridtotalrevealed.add_mines()
+        self.gridplayed.add_mines()
 
     def set_grid_played(self):
-        self.gridplayed = self.gridtotalrevealed
         self.gridplayed.calculate_number_neigboring_mines()
 
     def ask_user_input_coordinates_and_action(self):
@@ -179,10 +176,7 @@ class Cell:
     def __init__(self):
         self.mine = False
         self.revealed = False
-        self.flagged = False
-        self.xcoordinate = 0
-        self.ycoordinate = 0
-        self.numberNeighbors = 0
+        self.neighboring_mines_count = 0
 
     def add_mine(self):
         self.mine = True
@@ -197,7 +191,7 @@ class Cell:
         if self.mine:
             print("x", end="")
         else:
-            print(self.numberNeighbors, end="")
+            print(self.neighboring_mines_count, end="")
 
         # hier is een voorbeeld van een functie die andere functies in zelfde
         # level aanroept (nested structuur). Is dat good practice of juist
@@ -215,7 +209,7 @@ class Cell:
             else:
                 return False
         if (checkvalue == '0'):
-            if self.numberNeighbors == 0 and not self.mine:
+            if self.neighboring_mines_count == 0 and not self.mine:
                 return True
             else:
                 return False
@@ -223,7 +217,7 @@ class Cell:
         # is dit de nette manier of juist de omslachtige manier om
         # numberofneigbhborsmines te updaten?
     def add_number_neighboring_mines(self, numberofneighborsmines):
-        self.numberNeighbors = numberofneighborsmines
+        self.neighboring_mines_count = numberofneighborsmines
 
 
 def main():
