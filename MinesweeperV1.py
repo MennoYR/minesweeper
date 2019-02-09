@@ -10,7 +10,6 @@ import sys
 
 
 class Game:
-
     def __init__(self):
         self.gridtotalrevealed = Grid()
         self.gridplayed = self.gridtotalrevealed
@@ -36,7 +35,7 @@ class Game:
         self.set_grid_total_revealed()
         self.set_grid_played()
         self.gridplayed.show_grid()
-        while (self.game_end == False):
+        while not self.game_end:
             self.run_round()
 
     def run_round(self):
@@ -73,7 +72,6 @@ class Game:
 
 
 class Grid:
-
     def __init__(self):
         self.gridwidth = 10
         self.gridheight = 10
@@ -107,7 +105,7 @@ class Grid:
         while (numberofminesadded < self.numberofmines):
             y = random.randint(0, self.gridheight - 1)
             x = random.randint(0, self.gridwidth - 1)
-            if (False == self.matrix[x][y].mine):
+            if not self.matrix[x][y].mine:
                 self.matrix[x][y].add_mine()
                 numberofminesadded += 1
 
@@ -178,7 +176,6 @@ class Grid:
 
 
 class Cell:
-
     def __init__(self):
         self.mine = False
         self.revealed = False
@@ -197,7 +194,7 @@ class Cell:
         print("*", end="")
 
     def show_cell(self):
-        if (True == self.mine):
+        if self.mine:
             print("x", end="")
         else:
             print(self.numberNeighbors, end="")
@@ -206,19 +203,19 @@ class Cell:
         # level aanroept (nested structuur). Is dat good practice of juist
         # niet?
     def output_cell_value(self):
-        if (True == self.revealed):
+        if self.revealed:
             self.show_cell()
         else:
             self.hide_cell()
 
     def check_if_cell_contains(self, checkvalue):
         if (checkvalue == 'mine'):
-            if (self.mine == True):
+            if self.mine:
                 return True
             else:
                 return False
         if (checkvalue == '0'):
-            if (self.numberNeighbors == 0 and self.mine == False):
+            if self.numberNeighbors == 0 and not self.mine:
                 return True
             else:
                 return False
@@ -236,6 +233,7 @@ def main():
     game1 = Game()
     game1.run_game()
     print("The end...")
+
 
 if __name__ == "__main__":
     main()
