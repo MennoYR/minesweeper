@@ -89,13 +89,13 @@ class Grid:
         print("")
 
     def generate_mines(self):
-        mine_count_added = 0
-        while (mine_count_added < self.mine_count):
+        mine_added_count = 0
+        while (mine_added_count < self.mine_count):
             y = random.randint(0, self.height - 1)
             x = random.randint(0, self.width - 1)
             if not self.matrix[x][y].mine:
                 self.matrix[x][y].mine = True
-                mine_count_added += 1
+                mine_added_count += 1
 
     def update_number_neigboring_mines(self):
         for y in range(self.height):
@@ -103,8 +103,7 @@ class Grid:
                 if (self.matrix[x][y].mine):
                     pass
                 else:
-                    self.matrix[x][y].add_number_neighboring_mines(
-                        self.calculate_number_of_mines_in_neighborhood(x, y))
+                    self.matrix[x][y].neighboring_mines_count = self.calculate_number_of_mines_in_neighborhood(x, y)
 
     def reveal_cell(self, x, y):
         cell = self.matrix[x][y]
@@ -122,7 +121,7 @@ class Grid:
         for yi in range(y - 1, y + 2):
             for xi in range(x - 1, x + 2):
                 # Don't search outside of grid
-                if(xi < 0 or yi < 0 or xi >= self.width or yi >= self.height):
+                if xi < 0 or yi < 0 or xi >= self.width or yi >= self.height:
                     continue
                 # Recurse!
                 self.reveal_cell(xi, yi)
@@ -137,17 +136,17 @@ class Grid:
 
                 # if outside of range (@borders of grid) don't check just
                 # continue
-                if(xi < 0 or yi < 0 or xi >= self.width or yi >= self.height):
+                if xi < 0 or yi < 0 or xi >= self.width or yi >= self.height:
                     continue
                 else:  # if within range then check if neighbors cells contain checkvalue and increment the number of total neighbors
-                    if (self.matrix[xi][yi].mine):
+                    if self.matrix[xi][yi].mine:
                         numberofneighbors += 1
         return numberofneighbors
 
     def check_if_mine_is_revealed(self):
         for y in range(self.height):
             for x in range(self.width):
-                if(self.matrix[x][y].mine and self.matrix[x][y].revealed):
+                if self.matrix[x][y].mine and self.matrix[x][y].revealed:
                     return True
         return False
 
@@ -157,7 +156,7 @@ class Grid:
         revealed_cell_count = 0
         for y in range(self.height):
             for x in range(self.width):
-                if(self.matrix[x][y].revealed):
+                if self.matrix[x][y].revealed:
                     revealed_cell_count += 1
         return revealed_cell_count
 
@@ -168,9 +167,6 @@ class Cell:
         self.revealed = False
         self.neighboring_mines_count = 0
 
-    # hier is een voorbeeld van een functie die andere functies in zelfde
-    # level aanroept (nested structuur). Is dat good practice of juist
-    # niet?
     def output_cell_value(self):
         if not self.revealed:
             print("*", end="")
@@ -181,8 +177,6 @@ class Cell:
         else:
             print(self.neighboring_mines_count, end="")
 
-        # is dit de nette manier of juist de omslachtige manier om
-        # numberofneigbhborsmines te updaten?
     def add_number_neighboring_mines(self, numberofneighborsmines):
         self.neighboring_mines_count = numberofneighborsmines
 
