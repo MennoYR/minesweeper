@@ -41,7 +41,7 @@ class Game:
         revealed_cells_count = self.grid.calculate_number_cells_revealed()
         self.score = revealed_cells_count
 
-        if revealed_cells_count > self.grid.total_revealablecells:
+        if revealed_cells_count > self.grid.revealable_cell_count:
             self.end_of_game(won=True)
 
         print("Round number:", self.round_number)
@@ -65,12 +65,10 @@ class Grid:
     def __init__(self):
         self.width = 10
         self.height = 10
-        self.numberofmines = 10
-        self.numberofrevealedcells = 0
-        self.numberofcells = self.width * self.height
-        self.total_revealablecells = self.numberofcells - self.numberofmines
-        # Makes a list containing number of <height> lists, each of number
-        # of <width> items. All items == cell instance
+        self.mine_count = 10
+        self.cell_count = self.width * self.height
+        self.revealed_cell_count = 0
+        self.revealable_cell_count = self.cell_count - self.mine_count
         self.matrix = [[Cell() for x in range(self.width)]
                        for y in range(self.height)]
 
@@ -91,13 +89,13 @@ class Grid:
         print("")
 
     def generate_mines(self):
-        numberofminesadded = 0
-        while (numberofminesadded < self.numberofmines):
+        mine_count_added = 0
+        while (mine_count_added < self.mine_count):
             y = random.randint(0, self.height - 1)
             x = random.randint(0, self.width - 1)
             if not self.matrix[x][y].mine:
                 self.matrix[x][y].mine = True
-                numberofminesadded += 1
+                mine_count_added += 1
 
     def update_number_neigboring_mines(self):
         for y in range(self.height):
@@ -156,12 +154,12 @@ class Grid:
     def calculate_number_cells_revealed(self):
         # is het beter om lokaal een nieuwe variabele aan te maken of gewoon
         # deze even op 0 te zetten?
-        numberofrevealedcells = 0
+        revealed_cell_count = 0
         for y in range(self.height):
             for x in range(self.width):
                 if(self.matrix[x][y].revealed):
-                    numberofrevealedcells += 1
-        return numberofrevealedcells
+                    revealed_cell_count += 1
+        return revealed_cell_count
 
 
 class Cell:
