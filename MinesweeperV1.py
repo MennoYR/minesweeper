@@ -3,8 +3,13 @@
 # Add function flagged cleam main
 # check all variable names
 
+import collections
 import random
 import sys
+
+Move = collections.namedtuple('Person', 'action x y')
+
+# TODO: Make Cell
 
 
 class Game:
@@ -12,14 +17,8 @@ class Game:
         #The cell value is (0 for nothing, 1-8 for #neighboring mines count)
         self.gridplayed= Grid()
         self.game_end = False
-        self.nextmove_x = 0
-        self.nextmove_y = 0
-        self.nextmove_action = 'f'  	# 'f' flag or 'r' reveal
         self.score = 0
         self.round_number = 0
-
-    def set_grid_total_revealed(self):
-        self.gridplayed.add_mines()
 
     def set_grid_played(self):
         self.gridplayed.calculate_number_neigboring_mines()
@@ -29,7 +28,7 @@ class Game:
         pass
 
     def run_game(self):
-        self.set_grid_total_revealed()
+        self.gridplayed.add_mines()
         self.set_grid_played()
         self.gridplayed.show_grid()
         while not self.game_end:
@@ -37,18 +36,16 @@ class Game:
 
     def run_round(self):
         self.round_number += 1
-        self.user_input()
-        self.gridplayed.unveil_cell(self.nextmove_x, self.nextmove_y)
-        self.gridplayed.check_if_cells_need_to_be_revealed()
+        next_move = self.user_input()
+        self.gridplayed.reveal_cell(next_move.x, next_move.y)
         self.check_end_of_game()
         print("Round number:", self.round_number)
         self.gridplayed.show_grid()
 
     def user_input(self):
-        self.nextmove_x = int(input("Enter x value"))
-        self.nextmove_y = int(input("Enter y value"))
-        # input("Enter action value f(flag), r(reveal)")
-        self.nextmove_action = 'f'
+        x = int(input("Enter x value"))
+        y = int(input("Enter y value"))
+        return Move(action='flag', x=x, y=y)
 
     def check_end_of_game(self):
         # check if mine is revealed if so game ends
@@ -115,28 +112,23 @@ class Grid:
                     self.matrix[x][y].add_number_neighboring_mines(
                         self.calculate_number_in_neighborhood(x, y, 'mine'))
 
-    def check_if_cells_need_to_be_revealed(self):
-        for i in range(0, 5):
-            for y in range(self.gridheight):
-                for x in range(self.gridwidth):
-                    if (self.matrix[x][y].check_if_cell_contains('0') and self.matrix[x][y].revealed):
-                        self.reveal_all_cells_around(x, y)
-                    else:
-                        pass
+    def reveal_cell(self, x, y):
+        cell = self.matrix[x][y]
+        if cell.revealed:
+            return
+        cell.revealed = True
 
-    def reveal_all_cells_around(self, x, y):
+        # If not empty, stop searching
+        if not cell.check_if_cell_contains('0'):
+            return
+
         for yi in range(y - 1, y + 2):
             for xi in range(x - 1, x + 2):
-
-                # if outside of range (@borders of grid) don't check just
-                # continue
+                # Don't search outside of grid
                 if(xi < 0 or yi < 0 or xi >= self.gridwidth or yi >= self.gridheight):
                     continue
-                else:  # if within range then check if neighbors cells contain checkvalue and increment the number of total neighbors
-                    self.matrix[xi][yi].reveal_cell()
-
-    def unveil_cell(self, x, y):
-        self.matrix[x][y].reveal_cell()
+                # Recurse!
+                self.reveal_cell(xi, yi)
 
     def calculate_number_in_neighborhood(self, x, y, checkvalue):
         numberofneighbors = 0
