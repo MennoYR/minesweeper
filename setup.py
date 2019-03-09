@@ -9,6 +9,7 @@ setup(name='minesweeper',
       license='MIT',
       install_requires=[
           'keras',
+          'keras-rl',
           'h5py',
           'gym',
       ],

@@ -12,7 +12,7 @@ from gym.spaces.tuple_space import Tuple
 import gym
 import numpy as np
 
-from minesweeper import Game, Move, MoveResult
+from .minesweeper import Game, Move, MoveResult
 
 
 GRID_SIZE = 8

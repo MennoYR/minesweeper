@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import gym
 
@@ -9,8 +10,10 @@ from rl.agents.dqn import DQNAgent
 from rl.policy import BoltzmannQPolicy
 from rl.memory import SequentialMemory
 
-from minesweeper_env import MinesweeperEnv, GRID_SIZE
+from .minesweeper_env import MinesweeperEnv, GRID_SIZE
 
+IS_LOCAL = os.getenv("LOCALTRAIN")
+print("local train: {}".format(IS_LOCAL))
 
 # Get the environment and extract the number of actions.
 env = MinesweeperEnv()
@@ -35,14 +38,17 @@ print(model.summary())
 # even the metrics!
 memory = SequentialMemory(limit=50000, window_length=1)
 policy = BoltzmannQPolicy()
-dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=10,
+dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=1000,
                target_model_update=1e-2, policy=policy)
 dqn.compile(Adam(lr=1e-3), metrics=['mae'])
 
 # Okay, now it's time to learn something! We visualize the training here for show, but this
 # slows down training quite a lot. You can always safely abort the training prematurely using
 # Ctrl + C.
-dqn.fit(env, nb_steps=500000, visualize=False, verbose=1)
+if IS_LOCAL:
+    dqn.fit(env, nb_steps=50000, visualize=False, verbose=1)
+else:
+    dqn.fit(env, nb_steps=1000000, visualize=False, verbose=0)
 
 # After training is done, we save the final weights.
 dqn.save_weights('dqn_weights_{}.h5f'.format(GRID_SIZE), overwrite=True)
