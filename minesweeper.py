@@ -52,7 +52,7 @@ class Game:
         revealed_cells_count = self.grid.calculate_number_cells_revealed()
         self.score = revealed_cells_count
 
-        if revealed_cells_count > self.grid.revealable_cell_count:
+        if revealed_cells_count >= self.grid.revealable_cell_count:
             self.end_of_game(won=True)
             return MoveResult.GAME_WIN
 

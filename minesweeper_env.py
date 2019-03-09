@@ -15,14 +15,14 @@ import numpy as np
 from minesweeper import Game, Move, MoveResult
 
 
-GRID_SIZE = 5
-MINE_COUNT = 5
+GRID_SIZE = 8
+MINE_COUNT = 10
 
 
 class MinesweeperEnv(gym.Env):
     def __init__(self):
         self.game = Game(grid_size=GRID_SIZE, mine_count=MINE_COUNT)
-        self.action_space = spaces.Discrete(GRID_SIZE * GRID_SIZE)
+        # self.action_space = Tuple((Discrete(GRID_SIZE), Discrete(GRID_SIZE)))
         self.observation_space = spaces.Box(low=-1, high=8, shape=(GRID_SIZE, GRID_SIZE), dtype=np.int8)
 
     def step(self, action):
