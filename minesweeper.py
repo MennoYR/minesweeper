@@ -1,8 +1,16 @@
+from enum import IntEnum
 import collections
 import random
 import sys
 
-Move = collections.namedtuple('Person', 'action x y')
+Move = collections.namedtuple('Move', 'action x y')
+
+
+class MoveResult(IntEnum):
+    GAME_LOSS = -99
+    INVALID_MOVE = -99
+    NORMAL_MOVE = 1
+    GAME_WIN = 50
 
 
 class MineHitException(Exception):
@@ -10,28 +18,35 @@ class MineHitException(Exception):
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, grid_size=3, mine_count=3):
         sys.setrecursionlimit(10000)
-        self.grid = Grid()
+        self.grid = Grid(grid_size, mine_count)
         self.score = 0
         self.round_number = 0
-
-    def run_game(self):
         self.grid.generate_mines()
         self.grid.update_number_neigboring_mines()
-        self.grid.show_grid()
+
+    def run_game(self):
         while True:
             self.run_round()
 
     def run_round(self):
         self.round_number += 1
         next_move = self.user_input()
+        self.run_move(next_move)
+
+        print("Round number:", self.round_number)
+
+    def run_move(self, move):
+        cell = self.grid.matrix[move.x][move.y]
+        if cell.revealed is True:
+            return MoveResult.INVALID_MOVE
+
         try:
-            self.grid.reveal_cell(next_move.x, next_move.y)
-            self.grid.show_grid()
+            self.grid.reveal_cell(move.x, move.y)
         except MineHitException:
-            self.grid.show_grid()
             self.end_of_game(won=False)
+            return MoveResult.GAME_LOSS
 
         # Update score
         revealed_cells_count = self.grid.calculate_number_cells_revealed()
@@ -39,8 +54,9 @@ class Game:
 
         if revealed_cells_count > self.grid.revealable_cell_count:
             self.end_of_game(won=True)
+            return MoveResult.GAME_WIN
 
-        print("Round number:", self.round_number)
+        return MoveResult.NORMAL_MOVE
 
     def user_input(self):
         x = int(input("Enter x value"))
@@ -48,20 +64,20 @@ class Game:
         return Move(action='flag', x=x, y=y)
 
     def end_of_game(self, won=False):
+        return
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         if won:
             print("You win!!!! , your score is:")
         else:
             print("Game has ended because you revealed a mine, your score is:")
         print(self.score)
-        sys.exit()
 
 
 class Grid:
-    def __init__(self):
-        self.width = 50
-        self.height = 50
-        self.mine_count = 100
+    def __init__(self, size, mine_count):
+        self.width = size
+        self.height = size
+        self.mine_count = mine_count
         self.cell_count = self.width * self.height
         self.revealed_cell_count = 0
         self.revealable_cell_count = self.cell_count - self.mine_count
@@ -70,14 +86,8 @@ class Grid:
 
     def show_grid(self):
         print("  ", end="")
-        for i in range(0, self.height):  # add numbers to coloms
-            print("|", end="")
-            print(i, end="")
-        print("|", end="")
         for y in range(0, self.height):  # add numbers to the rows
             print("")
-            print(y, end="")
-            print("|", end="")
             for x in range(0, self.width):
                 print("|", end="")
                 self.matrix[x][y].output_cell_value()
@@ -171,6 +181,12 @@ class Cell:
             print("x", end="")
         else:
             print(self.neighboring_mines_count, end="")
+
+    def numerical_value(self):
+        if not self.revealed:
+            return -1
+        else:
+            return self.neighboring_mines_count
 
     def add_number_neighboring_mines(self, numberofneighborsmines):
         self.neighboring_mines_count = numberofneighborsmines
